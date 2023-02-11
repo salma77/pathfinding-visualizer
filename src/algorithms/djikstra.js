@@ -1,5 +1,5 @@
 /*
-Performs Djikstra's algorithm 
+Performs Djikstra's algorithm and finds the shortest path
 */
 export function djikstra(grid, startNode, finishNode) {
   if (!startNode || !finishNode || startNode === finishNode) return false;
@@ -9,6 +9,7 @@ export function djikstra(grid, startNode, finishNode) {
   const unvisitedNodes = getAllNodes(grid);
 
   while (!!unvisitedNodes.length) {
+    // sort unvisited nodes by the closest in distance
     sortNodesByDistance(unvisitedNodes);
 
     const closestNode = unvisitedNodes.shift();
@@ -17,7 +18,7 @@ export function djikstra(grid, startNode, finishNode) {
     // If the closest node has distance of infinity
     // this means we're trapped, so we must return
     if (closestNode.distance === Infinity) return visitedNodesInOrder;
-
+    closestNode.isVisited = true;
     visitedNodesInOrder.push(closestNode);
     if (closestNode === finishNode) return visitedNodesInOrder;
     updateUnvisitedNeighbors(closestNode, grid);

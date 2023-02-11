@@ -1,6 +1,6 @@
 import React, {Component} from "react";
-import { djikstra, getNodesInShortestPathOrder } from "../algorithms/djikstra";
 import Node from './Node/Node';
+import { djikstra, getNodesInShortestPathOrder } from "../algorithms/djikstra";
 
 import './PathfindingVisualizer.css';
 
@@ -38,17 +38,26 @@ export default class PathfindingVisualizer extends Component {
         this.setState({mousePressed:false});
     }
 
-    animateDjikstra(visitedNodesInOrder){
-        for(let i = 0; i < visitedNodesInOrder.length; i++){
+    animateDjikstra(visitedNodesInOrder, nodesInShortestPathOrder){
+        for(let i = 0; i <= visitedNodesInOrder.length; i++){
+            if(i === visitedNodesInOrder.length){
+                setTimeout(()=>{
+                    this.animateShortestPath(nodesInShortestPathOrder)
+                }, 20 * i)
+                return;
+            }
             setTimeout(()=>{
                 const node = visitedNodesInOrder[i]
-                const newGrid = this.state.grid.slice()
-                const newNode = {
-                    ...node,
-                    isVisited: true,
-                };
-                newGrid[node.row][node.col] = newNode
-                this.setState({grid: newGrid});
+                document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-visited';
+            }, 20 * i);
+        }
+    }
+
+    animateShortestPath(nodesInShortestPathOrder){
+        for(let i = 0; i < nodesInShortestPathOrder.length; i++){
+            setTimeout(()=>{
+                const node = nodesInShortestPathOrder[i]
+                document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-shotest-path';
             }, 15 * i);
         }
     }
@@ -58,11 +67,12 @@ export default class PathfindingVisualizer extends Component {
         const startNode = grid[START_NODE_ROW][START_NODE_COL]
         const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL]
         const visitedNodesInOrder = djikstra(grid, startNode, finishNode)
-        this.animateDjikstra(visitedNodesInOrder)
+        const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode)
+        this.animateDjikstra(visitedNodesInOrder, nodesInShortestPathOrder)
     }
 
     render(){
-        const {grid} = this.state;
+        const {grid, mousePressed} = this.state;
 
         return(
             <>
@@ -79,15 +89,19 @@ export default class PathfindingVisualizer extends Component {
                                         <Node 
                                             key={nodeIdx} 
                                             col={col}
-                                            row={row}
                                             isStart={isStart}
                                             isFinish={isFinish}
                                             isVisited={isVisited}
-                                            isWall={isWall}></Node>
-                                    )}
-                                )}
+                                            isWall={isWall}
+                                            mousePressed={mousePressed}
+                                            onMouseDown={(row, col) => this.handleMouseDown(row, col)}
+                                            onMouseEnter={(row, col) => this.handleMouseEnter(row, col)}
+                                            onMouseUp={() => this.handleMouseUp()}
+                                            row={row}></Node>
+                                    )
+                                })}
                             </div>
-                            )
+                        )
                     })}
                 </div>
             </>
